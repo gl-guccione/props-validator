@@ -1,7 +1,7 @@
 const errorStyle =
-  "background-color: #ffe500; background-image: linear-gradient(80deg, #ffe500 0%, #ffb44e 100%); color: #0062FF; padding: 6px; border-radius: 1px; font-weight: 700; font-size: 1.15em; line-height: 1.9em; border-left: 8px solid #FF2525;";
+  "background-color: #ffe500; background-image: linear-gradient(80deg, #ffe500 0%, #ffb44e 100%); color: #0062FF; padding: 6px; border-radius: 1px; font-weight: 700; font-size: 1.15em; line-height: 2.15em; border-left: 8px solid #FF2525;";
 const warningStyle =
-  "background-color: #ffffff; background-image: linear-gradient(60deg, #ffffff 0%, #beecff 100%); color: #0062FF; padding: 6px; border-radius: 1px; font-weight: 700; font-size: 1.15em; line-height: 1.9em; border-left: 8px solid #FFBE25";
+  "background-color: #ffffff; background-image: linear-gradient(60deg, #ffffff 0%, #beecff 100%); color: #0062FF; padding: 6px; border-radius: 1px; font-weight: 700; font-size: 1.15em; line-height: 2.15em; border-left: 8px solid #FFBE25";
 
 const propValidator = {
   /**
@@ -35,11 +35,8 @@ const propValidator = {
       console.log(
         overrideErrorMessage
           ? `%c 🤬 ${overrideErrorMessage} `
-          : `%c 🤬 ${message}`,
-        getStyle(),
-        "val =>",
-        pValue,
-        `:${typeof pValue}`
+          : `%c 🤬 ${message} |r => (${pValue}:${typeof pValue})`,
+        getStyle()
       );
     };
 
@@ -47,7 +44,7 @@ const propValidator = {
       throwError(
         `propValidator => error on ${cName} component${
           section ? `(under ${section})` : ""
-        }, "${pName}" ${required ? "must" : "should"} be defined `
+        }, "${pName}" ${required ? "must" : "should"} be defined.`
       );
       return;
     }
@@ -57,9 +54,9 @@ const propValidator = {
           section ? `(under ${section})` : ""
         }, "${pName}" ${
           required ? "can" : "should"
-        } not have value "${pValue}", possible values are ${qualifiedValues
+        } not have value "${pValue}":${typeof pValue}, possible values are ${qualifiedValues
           .map((qVal) => `"${qVal}":${typeof qVal}`)
-          .join(", ")}`
+          .join(", ")}.`
       );
       return;
     }
