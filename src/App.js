@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 
 import logo from "./logo.svg";
 import "./App.css";
-import propValidator from "./propValidator";
+import pValidator from "./propValidator";
 
 const App = (props) => {
   const {
@@ -17,10 +17,18 @@ const App = (props) => {
   useEffect(() => {
     const isValidatorEnabled = sessionStorage.getItem("propValidator");
     if (isValidatorEnabled) {
-      propValidator.valueWithOptions(
-        { cName: "App", pName: "vSelect" },
+      pValidator.checkType(
+        { cName: "App", pName: "vString", expectedTypes: ["string"] },
+        vString
+      );
+      pValidator.valueWithOptions(
+        { cName: "App", pName: "vSelect", expectedTypes: ["string", "number"] },
         vSelect,
-        ["ciao", "uno", 3]
+        ["ciao", "uno", 3, "cinquantadue"]
+      );
+      pValidator.stringIsRichText(
+        { cName: "App", pName: "vRichText" },
+        vRichText
       );
     }
   }, []);

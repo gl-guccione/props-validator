@@ -9,7 +9,7 @@ root.render(
   <React.StrictMode>
     <App
       vString="ciao"
-      vSelect={2}
+      vSelect={"cinquantadue"}
       vRichText="<p>content</p>"
       vStringCustomRegex="U88HCC"
       vBool={true}

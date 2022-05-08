@@ -3,64 +3,158 @@ const errorStyle =
 const warningStyle =
   "background-color: #ffffff; background-image: linear-gradient(60deg, #ffffff 0%, #beecff 100%); color: #0062FF; padding: 6px; border-radius: 1px; font-weight: 700; font-size: 1.15em; line-height: 2.15em; border-left: 8px solid #FFBE25";
 
-const propValidator = {
-  /**
-   * validate values and compare with the qualified values passed with parameters
-   *
-   * @param {object} conf configuration object
-   * @param {any} pValue value of the prop
-   * @param {array} qualifiedValues accepted values
-   */
-  valueWithOptions: (conf = {}, pValue = "", qualifiedValues = []) => {
-    const {
-      cName = "",
-      pName = "",
-      section = "",
-      style = "error",
-      overrideErrorMessage,
-      required = true,
-    } = conf;
-
-    const getStyle = () => {
-      return style === "error"
-        ? errorStyle
-        : style === "warning"
-        ? warningStyle
-        : style
-        ? style
-        : "color: blue";
-    };
-
-    const throwError = (message = "error") => {
-      console.log(
-        overrideErrorMessage
-          ? `%c 🤬 ${overrideErrorMessage} `
-          : `%c 🤬 ${message} |r => (${pValue}:${typeof pValue})`,
-        getStyle()
-      );
-    };
-
-    if (pValue === "") {
-      throwError(
-        `propValidator => error on ${cName} component${
-          section ? `(under ${section})` : ""
-        }, "${pName}" ${required ? "must" : "should"} be defined.`
-      );
-      return;
-    }
-    if (qualifiedValues.length && !qualifiedValues.includes(pValue)) {
-      throwError(
-        `propValidator => error on ${cName} component${
-          section ? `(under ${section})` : ""
-        }, "${pName}" ${
-          required ? "can" : "should"
-        } not have value "${pValue}":${typeof pValue}, possible values are ${qualifiedValues
-          .map((qVal) => `"${qVal}":${typeof qVal}`)
-          .join(", ")}.`
-      );
-      return;
-    }
-  },
+const getStyle = (style) => {
+  return style === "error"
+    ? errorStyle
+    : style === "warning"
+    ? warningStyle
+    : style
+    ? style
+    : "background-color: #fff; color: #0062FF";
 };
 
-export default propValidator;
+const getCorrectTypeOf = (value) => {
+  return typeof value === "object"
+    ? Array.isArray(value)
+      ? "array"
+      : "object"
+    : typeof value;
+};
+
+const throwError = (
+  name,
+  value,
+  style,
+  message = "error",
+  overrideErrorMessage = ""
+) => {
+  const typeOfValue = getCorrectTypeOf(value);
+
+  console.log(
+    overrideErrorMessage
+      ? `%c 🤬 ${overrideErrorMessage} `
+      : `%c 🤬 ${message} `,
+    getStyle(style)
+  );
+  console.log(`%c 🪃 ${name} => (${value}:${typeOfValue})`, getStyle(style));
+  if (typeOfValue === "object" || typeOfValue === "array") {
+    if (Object.keys([value]).length) {
+      console.log(value);
+    } else {
+      console.table(value);
+    }
+  }
+};
+
+const checkForEmpty = (conf = {}, pValue = "") => {
+  const {
+    cName = "",
+    pName = "",
+    section = "",
+    style = "error",
+    overrideErrorMessage = "",
+  } = conf;
+
+  if (pValue === "") {
+    throwError(
+      pName,
+      pValue,
+      style,
+      `propValidator => error on ${cName} component${
+        section ? `(under ${section})` : ""
+      }, "${pName}" must be defined.`,
+      overrideErrorMessage
+    );
+    return true;
+  }
+};
+
+const checkType = (conf = {}, pValue = "") => {
+  const {
+    cName = "",
+    pName = "",
+    expectedTypes = ["string"],
+    section = "",
+    style = "error",
+    overrideErrorMessage = "",
+  } = conf;
+  const typeOfValue = getCorrectTypeOf(pValue);
+
+  let result = checkForEmpty(conf, pValue);
+  if (result) return true;
+
+  if (!expectedTypes.includes(typeOfValue)) {
+    throwError(
+      pName,
+      pValue,
+      style,
+      `propValidator => error on ${cName} component${
+        section ? `(under ${section})` : ""
+      }, "${pName}" expected to be ${expectedTypes.join(
+        " or "
+      )}, instead got ${typeOfValue}`,
+      overrideErrorMessage
+    );
+    return true;
+  }
+};
+
+const valueWithOptions = (conf = {}, pValue = "", qualifiedValues = []) => {
+  const {
+    cName = "",
+    pName = "",
+    section = "",
+    style = "error",
+    overrideErrorMessage = "",
+  } = conf;
+  const typeOfValue = getCorrectTypeOf(pValue);
+
+  let result = checkType(conf, pValue);
+  if (result) return true;
+
+  if (qualifiedValues.length && !qualifiedValues.includes(pValue)) {
+    throwError(
+      pName,
+      pValue,
+      style,
+      `propValidator => error on ${cName} component${
+        section ? `(under ${section})` : ""
+      }, "${pName}" can not have value "${pValue}":${typeOfValue}, possible values are ${qualifiedValues
+        .map((qVal) => `"${qVal}":${getCorrectTypeOf(qVal)}`)
+        .join(", ")}.`,
+      overrideErrorMessage
+    );
+    return true;
+  }
+};
+
+const stringIsRichText = (conf = {}, pValue = "") => {
+  const {
+    cName = "",
+    pName = "",
+    section = "",
+    style = "error",
+    overrideErrorMessage = "",
+  } = conf;
+  const typeOfValue = getCorrectTypeOf(pValue);
+
+  let result = checkForEmpty(conf, pValue);
+  if (result) return true;
+  result = checkType({ ...conf, expectedTypes: ["string"] }, pValue);
+  if (result) return true;
+
+  if (!pValue.trim().match(/^<p>.*<\/p>$/)) {
+    throwError(
+      pName,
+      pValue,
+      style,
+      `propValidator => error on ${cName} component${
+        section ? `(under ${section})` : ""
+      }, "${pName}" can not have value "${pValue}":${typeOfValue}, it must be a richtext (string with <p> ... </p>)`,
+      overrideErrorMessage
+    );
+    return true;
+  }
+};
+
+export default { checkForEmpty, checkType, valueWithOptions, stringIsRichText };
