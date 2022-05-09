@@ -30,6 +30,19 @@ const App = (props) => {
         { cName: "App", pName: "vRichText" },
         vRichText
       );
+      pValidator.stringMatchRegex(
+        { cName: "App", pName: "vStringCustomRegex" },
+        vStringCustomRegex,
+        "^U.*(c|C)$"
+      );
+      pValidator.checkType(
+        {
+          cName: "App",
+          pName: "vBool",
+          expectedTypes: ["boolean"],
+        },
+        vBool
+      );
     }
   }, []);
 
